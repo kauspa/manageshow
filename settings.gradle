@@ -1,0 +1,4 @@
+rootProject.name = 'manageshow'
+
+include 'manageshow-client'
+include 'manageshow-server'
