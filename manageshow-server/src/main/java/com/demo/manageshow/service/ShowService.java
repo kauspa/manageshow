@@ -16,6 +16,6 @@ public interface ShowService {
     Optional<Show> getShowById(String showId);
 
     static boolean isValid(Show s) {
-        return s != null && (s.getRows() >= 1 && s.getRows() < ROWS_MAX) && (s.getSeats() >= 1 && s.getSeats() <= SEATS_MAX);
+        return s != null && (s.getRows() >= 1 && s.getRows() <= ROWS_MAX) && (s.getSeats() >= 1 && s.getSeats() <= SEATS_MAX);
     }
 }
