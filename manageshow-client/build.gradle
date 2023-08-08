@@ -10,7 +10,7 @@ group = 'com.demo'
 version = '0.0.1-SNAPSHOT'
 
 java {
-    sourceCompatibility = '17'
+    sourceCompatibility = '8'
 }
 
 repositories {
@@ -18,8 +18,8 @@ repositories {
 }
 
 dependencies {
-    implementation 'org.springframework:spring-context:6.0.11'
-    implementation 'org.springframework:spring-web:6.0.11'
+    implementation 'org.springframework:spring-context:5.3.29'
+    implementation 'org.springframework:spring-web:5.3.29'
     implementation 'com.fasterxml.jackson.core:jackson-databind:2.15.2'
     implementation "ch.qos.logback:logback-classic:1.4.7"
     testImplementation "org.junit.jupiter:junit-jupiter:5.9.1"

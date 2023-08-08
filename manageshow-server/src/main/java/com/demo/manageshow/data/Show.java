@@ -1,9 +1,6 @@
 package com.demo.manageshow.data;
 
-import java.util.HashSet;
 import java.util.Objects;
-import java.util.Set;
-import java.util.stream.IntStream;
 
 public class Show {
     private final String showId;

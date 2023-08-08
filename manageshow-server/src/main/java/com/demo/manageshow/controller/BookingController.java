@@ -2,9 +2,11 @@ package com.demo.manageshow.controller;
 
 import com.demo.manageshow.controller.data.BookingRequest;
 import com.demo.manageshow.controller.data.CancelRequest;
-import com.demo.manageshow.data.*;
+import com.demo.manageshow.data.Booking;
+import com.demo.manageshow.data.Buyer;
+import com.demo.manageshow.data.Seat;
+import com.demo.manageshow.data.Show;
 import com.demo.manageshow.service.*;
-import jakarta.websocket.server.PathParam;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.*;

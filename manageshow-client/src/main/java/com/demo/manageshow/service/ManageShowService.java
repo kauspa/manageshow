@@ -34,13 +34,13 @@ public class ManageShowService {
     }
 
     public void viewShow(String showId) {
-        ResponseEntity<List<Show>> response = restTemplate.exchange(baseUrl + "/shows", HttpMethod.GET, null, new ParameterizedTypeReference<>() {
+        ResponseEntity<List<Show>> response = restTemplate.exchange(baseUrl + "/shows", HttpMethod.GET, null, new ParameterizedTypeReference<List<Show>>() {
         });
         if (response.getStatusCode() == HttpStatus.OK) {
             for (Show s : response.getBody()) {
                 print(s);
             }
-            ResponseEntity<Collection<Booking>> showBookingResponse = restTemplate.exchange(baseUrl + "/bookings/" + showId, HttpMethod.GET, null, new ParameterizedTypeReference<>() {
+            ResponseEntity<Collection<Booking>> showBookingResponse = restTemplate.exchange(baseUrl + "/bookings/" + showId, HttpMethod.GET, null, new ParameterizedTypeReference<Collection<Booking>>() {
             });
             if (showBookingResponse.getStatusCode() == HttpStatus.OK) {
                 Collection<Booking> bookings = showBookingResponse.getBody();
@@ -74,7 +74,7 @@ public class ManageShowService {
     }
 
     public void viewAvailability(String showId) {
-        ResponseEntity<Collection<Seat>> response = restTemplate.exchange(baseUrl + "/availability/" + showId, HttpMethod.GET, null, new ParameterizedTypeReference<>() {
+        ResponseEntity<Collection<Seat>> response = restTemplate.exchange(baseUrl + "/availability/" + showId, HttpMethod.GET, null, new ParameterizedTypeReference<Collection<Seat>>() {
         });
         if (response.getStatusCode() == HttpStatus.OK) {
             Collection<Seat> availableSeat = response.getBody();

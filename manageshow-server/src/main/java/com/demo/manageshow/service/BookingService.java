@@ -5,8 +5,6 @@ import com.demo.manageshow.data.Buyer;
 import com.demo.manageshow.data.Seat;
 import com.demo.manageshow.data.Show;
 
-import java.util.Collection;
-import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
