@@ -9,14 +9,18 @@ import com.demo.manageshow.service.ConflictException;
 import com.demo.manageshow.service.InvalidException;
 import org.springframework.stereotype.Service;
 
+import java.awt.print.Book;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 public class MemBookingService implements BookingService {
     private final ConcurrentHashMap<Show, ConcurrentHashMap<Seat, Booking>> showSeatBookingMap = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<Show, Set<Seat>> showSeating = new ConcurrentHashMap<>();
     private final AtomicLong ticketNo = new AtomicLong();
 
     @Override
@@ -67,8 +71,41 @@ public class MemBookingService implements BookingService {
 
     @Override
     public Booking cancelTicket(Buyer buyer, Show show) {
+        Optional<Booking> buyerBooking = Optional.empty();
+        Map<Seat, Booking> seatBookingMap = showSeatBookingMap.get(show);
+        //get booked seats for the show
+        if (seatBookingMap == null || seatBookingMap.isEmpty()) {
+            throw new InvalidException(String.format("Show Id %s has no booking", show.getShowId()));
+        } else {
+            //get buyer booking
+            buyerBooking = seatBookingMap.values().parallelStream().filter(b -> b.getBuyer().equals(buyer)).findFirst();
 
-        return null;
+            if (buyerBooking.isEmpty()) {
+                throw new InvalidException(String.format("Invalid booking NOT found user %s for Show Id %s.",
+                        buyer, show.getShowId()));
+            }
+
+            //get threshold time
+            Optional<LocalDateTime> thresholdTimeOpt = buyerBooking.map(b -> b.getBookingTime()
+                    .plusMinutes(show.getCancellationMinutesAfterBooking())).stream().findFirst();
+            //check cancellation criteria
+
+            boolean isCancellable = thresholdTimeOpt.isEmpty() ? false :
+                    thresholdTimeOpt.map(t -> LocalDateTime.now().isBefore(t)).orElseGet(() -> false);
+            String cancellationTime = thresholdTimeOpt.orElseGet(() -> LocalDateTime.now()).toString();
+
+            if (!isCancellable) {
+                throw new InvalidException(String.format("Too late. Cancellation time was %s for Show Id %s booking %s.",
+                        cancellationTime, show.getShowId(), buyerBooking.orElseGet(null)));
+            } else {
+                //cancel booking
+                buyerBooking.ifPresentOrElse(b -> {
+                    b.getReservedSeats().forEach(seatBookingMap::remove);
+                }, () -> {
+                });
+            }
+        }
+        return buyerBooking.orElse(null);
     }
 
     @Override
@@ -78,7 +115,35 @@ public class MemBookingService implements BookingService {
 
     @Override
     public Set<Booking> getBookingByShow(Show show) {
-        return null;
+        Map<Seat, Booking> booking = showSeatBookingMap.get(show);
+
+        if (booking != null) {
+            return booking.values().stream().collect(Collectors.toSet());
+        } else {
+            return Collections.emptySet();
+        }
+    }
+
+    @Override
+    public Set<Seat> getAvailabilityByShow(Show show) {
+        Set<Seat> seating = showSeating.get(show);
+        if (seating == null) {
+            seating = new HashSet<>();
+            for (int r = 1; r <= show.getRows(); r++) {
+                for (int s = 1; s <= show.getSeats(); s++) {
+                    seating.add(new Seat(r, s));
+                }
+            }
+            showSeating.put(show, seating);
+        }
+        Collection<Booking> bookings = getBookingByShow(show);
+        Set<Seat> reservedSeat = bookings.stream().flatMap(b -> b.getReservedSeats().stream()).collect(Collectors.toSet());
+
+        Set<Seat> available = new TreeSet<Seat>(Comparator.comparingInt(Seat::getRow).thenComparing(Seat::getSeatNo));
+        available.addAll(seating);
+        available.removeAll(reservedSeat);
+
+        return available;
     }
 
     @Override

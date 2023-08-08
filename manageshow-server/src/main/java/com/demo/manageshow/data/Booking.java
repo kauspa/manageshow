@@ -35,6 +35,10 @@ final public class Booking {
         return reservedSeats;
     }
 
+    public LocalDateTime getBookingTime() {
+        return bookingTime;
+    }
+
     @Override
     public String toString() {
         return "Booking{" +

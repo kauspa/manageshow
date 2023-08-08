@@ -1,17 +1,21 @@
 package com.demo.manageshow.data;
 
+import java.util.HashSet;
 import java.util.Objects;
+import java.util.Set;
+import java.util.stream.IntStream;
 
 public class Show {
     private final String showId;
     private String showName;
     private final int rows, seats;
     private int cancellationMinutesAfterBooking;
+
     public Show(String showId, int rows, int seats) {
         this.showId = showId;
         this.rows = rows;
         this.seats = seats;
-        this.cancellationMinutesAfterBooking=2;
+        this.cancellationMinutesAfterBooking = 2;
     }
 
     public String getShowName() {
@@ -46,7 +50,6 @@ public class Show {
     public void setCancellationMinutesAfterBooking(int cancellationMinutesAfterBooking) {
         this.cancellationMinutesAfterBooking = cancellationMinutesAfterBooking;
     }
-
     @Override
     public boolean equals(Object obj) {
         if (this == obj) {

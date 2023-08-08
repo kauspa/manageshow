@@ -5,6 +5,7 @@ import com.demo.manageshow.service.NotFoundException;
 import com.demo.manageshow.service.ShowService;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Collection;
 import java.util.Optional;
 import java.util.Set;
 
@@ -22,7 +23,7 @@ public class ShowController {
     }
 
     @GetMapping("/shows")
-    Set<Show> getAll() {
+    Collection<Show> getAll() {
         return showService.getShows();
     }
 
