@@ -5,20 +5,17 @@ import com.demo.manageshow.service.InvalidException;
 import com.demo.manageshow.service.ShowService;
 import org.springframework.stereotype.Service;
 
-import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicLong;
 
 @Service
 public class MemShowService implements ShowService {
     private static final String PREFIX = "Show-";
-    AtomicInteger showCounter = new AtomicInteger();
-    ConcurrentHashMap<String, Show> showMap = new ConcurrentHashMap<>();
+    private final AtomicInteger showCounter = new AtomicInteger();
+    private final ConcurrentHashMap<String, Show> showMap = new ConcurrentHashMap<>();
 
     @Override
     public Show addShow(Show show) {
@@ -27,7 +24,7 @@ public class MemShowService implements ShowService {
             newShow.setShowName(show.getShowName());
             return showMap.put(newShow.getShowId(), newShow);
         } else {
-            throw new InvalidException("Invalid rows or seats in %s".format(show.toString()));
+            throw new InvalidException(String.format("Invalid rows or seats in %s",show.toString()));
         }
     }
 

@@ -1,7 +1,6 @@
 package com.demo.manageshow.controller;
 
 import com.demo.manageshow.data.Show;
-import com.demo.manageshow.service.BookingService;
 import com.demo.manageshow.service.NotFoundException;
 import com.demo.manageshow.service.ShowService;
 import org.springframework.web.bind.annotation.*;
@@ -11,7 +10,7 @@ import java.util.Set;
 
 @RestController
 public class ShowController {
-    private ShowService showService;
+    private final ShowService showService;
 
     public ShowController(ShowService showService) {
         this.showService = showService;
@@ -30,7 +29,7 @@ public class ShowController {
     @GetMapping("/shows/{showId}")
     Show getById(@PathVariable String showId) {
         Optional<Show> show = showService.getShowById(showId);
-        return show.orElseThrow(() -> new NotFoundException("Show %s NOT found".format(showId)));
+        return show.orElseThrow(() -> new NotFoundException(String.format("Show %s NOT found",showId)));
     }
 
 }

@@ -1,14 +1,16 @@
 package com.demo.manageshow.service;
 
-import com.demo.manageshow.data.*;
+import com.demo.manageshow.data.Booking;
+import com.demo.manageshow.data.Buyer;
+import com.demo.manageshow.data.Show;
 
 import java.util.Optional;
 import java.util.Set;
 
 public interface BookingService {
-    public Booking bookTicket(Buyer buyer,Show show, Set<Seat> seats);
-    public Booking cancelTicket(Buyer buyer,Show show);
-    public Set<Booking> getBookingByBuyer(Buyer buyer);
-    public Set<Booking> getBookingByShow(Show show);
-    public Optional<Booking> getBookingByTicketNo(String ticketNo);
+    Booking bookTicket(Buyer buyer,Show show, Set<String> reserveSeats);
+    Booking cancelTicket(Buyer buyer,Show show);
+    Set<Booking> getBookingByBuyer(Buyer buyer);
+    Set<Booking> getBookingByShow(Show show);
+    Optional<Booking> getBookingByTicketNo(String ticketNo);
 }
