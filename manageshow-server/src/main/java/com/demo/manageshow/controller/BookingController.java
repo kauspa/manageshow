@@ -4,6 +4,7 @@ import com.demo.manageshow.controller.data.BookingRequest;
 import com.demo.manageshow.controller.data.CancelRequest;
 import com.demo.manageshow.data.*;
 import com.demo.manageshow.service.*;
+import jakarta.websocket.server.PathParam;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.*;
@@ -59,8 +60,16 @@ public class BookingController {
         return cancelledBooking;
     }
 
-    @PostMapping("/login")
-    public Buyer login(@RequestBody Buyer buyer) {
+    @PostMapping("/buyer")
+    public Buyer buyer(@RequestBody Buyer buyer) {
         return buyerService.addBuyer(buyer);
     }
+
+    @GetMapping("/buyer/{phone}")
+    public Buyer getBuyer(@PathVariable String phone) {
+        Buyer existing = buyerService.getBuyerByMobile(phone).orElseThrow(() ->
+                new NotFoundException(String.format("User phone# %s NOT found", phone)));
+        return existing;
+    }
+
 }

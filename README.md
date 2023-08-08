@@ -4,7 +4,7 @@
 gradlew.bat manageshow-server:bootRun
 
 
-curl -i -X POST -d {\"firstName\":\"Smith\",\"mobile\":9796185552,\"lastName\":\"dan\"} --header "Content-Type:application/json" http://localhost:8181/login
+curl -i -X POST -d {\"firstName\":\"Smith\",\"mobile\":9796185552,\"lastName\":\"dan\"} --header "Content-Type:application/json" http://localhost:8181/buyer
 curl -i -X POST -d {\"showName\":\"MyShow2\",\"rows\":21,\"seats\":5} --header "Content-Type:application/json" http://localhost:8181/shows
 curl http://localhost:8181/shows
 curl http://localhost:8181/bookings/Show-1
