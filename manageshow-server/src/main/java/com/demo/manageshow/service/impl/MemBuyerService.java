@@ -18,7 +18,7 @@ public class MemBuyerService implements BuyerService {
     public Buyer addBuyer(Buyer buyer) {
         Buyer existingBuyer = buyerMap.putIfAbsent(buyer.getMobile(), buyer);
         if (existingBuyer != null) {
-            throw new DuplicateException(String.format("User with %s mobile number exist", buyer.getMobile()));
+            throw new DuplicateException(String.format("User's %s mobile already exists!", buyer.getMobile()));
         }
         return buyer;
     }

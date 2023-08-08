@@ -14,5 +14,6 @@ curl -i -X POST -d {\"showId\":\"Show-1\",\"mobile\":9796185552} --header "Conte
 curl http://localhost:8181/bookings/Show-1
 curl -i -X POST -d {\"showId\":\"Show-1\",\"mobile\":9796185552,\"seats\":[\"A1\",\"A2\"]} --header "Content-Type:application/json" http://localhost:8181/book
 curl http://localhost:8181/bookings/Show-1
-curl -i -X POST -d {\"showId\":\"Show-1\",\"mobile\":9796185552} --header "Content-Type:application/json" http://localhost:8181/cancel
+curl -i -X POST -d {\"ticketNo\":\"2\",\"mobile\":9796185552} --header "Content-Type:application/json" http://localhost:8181/cancel
+curl http://localhost:8181/bookings/Show-1
 ```

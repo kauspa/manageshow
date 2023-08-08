@@ -1,7 +1,11 @@
 package com.demo.manageshow.service;
 
-public class DuplicateException extends RuntimeException{
-    public DuplicateException(String message){
+public class DuplicateException extends RuntimeException {
+    public DuplicateException(String message) {
         super(message);
+    }
+
+    public DuplicateException(String message, Throwable cause) {
+        super(message, cause);
     }
 }

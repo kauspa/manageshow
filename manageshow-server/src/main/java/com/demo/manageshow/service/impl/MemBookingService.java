@@ -7,6 +7,7 @@ import com.demo.manageshow.data.Show;
 import com.demo.manageshow.service.BookingService;
 import com.demo.manageshow.service.ConflictException;
 import com.demo.manageshow.service.InvalidException;
+import com.demo.manageshow.service.NotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.awt.print.Book;
@@ -19,7 +20,14 @@ import java.util.stream.Stream;
 
 @Service
 public class MemBookingService implements BookingService {
+    // Models Show's -> Seat's -> Booking. Used for booking show tickets concurrently
     private final ConcurrentHashMap<Show, ConcurrentHashMap<Seat, Booking>> showSeatBookingMap = new ConcurrentHashMap<>();
+
+    // Models ticketNo's -> SeatBookingMap of above showSeatBookingMap. Used for cancelling by ticketNo
+    // showSeatBookingMap seatBooking map is used as reference value in ticketNoSeatBookingMap
+    private final ConcurrentHashMap<String, ConcurrentHashMap<Seat, Booking>> ticketNoSeatBookingMap = new ConcurrentHashMap<>();
+    // Models Show -> full seating. Used to get availability by math: (all seating - booked seat)
+    // Cache for show's seating
     private final ConcurrentHashMap<Show, Set<Seat>> showSeating = new ConcurrentHashMap<>();
     private final AtomicLong ticketNo = new AtomicLong();
 
@@ -36,12 +44,12 @@ public class MemBookingService implements BookingService {
         }
         //add seat map if not present
         showSeatBookingMap.putIfAbsent(show, new ConcurrentHashMap<>());
-        Map<Seat, Booking> seatMap = showSeatBookingMap.get(show);
+        ConcurrentHashMap<Seat, Booking> seatMap = showSeatBookingMap.get(show);
         //validate if booking exists
         //create booking exists for this user
         Optional<Booking> existingBookingOpt = seatMap.values().parallelStream().filter(b -> b.getBuyer().equals(buyer)).findFirst();
         if (existingBookingOpt.isPresent()) {
-            throw new InvalidException(String.format("Booking found %s. Cannot book again.", existingBookingOpt.get()));
+            throw new InvalidException(String.format("Booking found %s. Only one booking per phone# is allowed per show.", existingBookingOpt.get()));
         }
         //create new booking
         Booking result = new Booking(String.valueOf(ticketNo.incrementAndGet()), show, buyer, seats);
@@ -63,6 +71,9 @@ public class MemBookingService implements BookingService {
                 seatMap.remove(orderedSeat.get(j));
             }
             throw new ConflictException(String.format("Seat %s was already taken", orderedSeat.get(i).toString()));
+        } else {
+            //Maintain cache from ticketNo to share showSeatBookingMap to cancel by ticketNo
+            ticketNoSeatBookingMap.put(result.getTicketNo(), seatMap);
         }
 
         return result;
@@ -70,37 +81,41 @@ public class MemBookingService implements BookingService {
 
 
     @Override
-    public Booking cancelTicket(Buyer buyer, Show show) {
+    public Booking cancelTicket(Buyer buyer, String tobeCancelledTicketNo) {
         Optional<Booking> buyerBooking = Optional.empty();
-        Map<Seat, Booking> seatBookingMap = showSeatBookingMap.get(show);
+        Map<Seat, Booking> seatBookingMap = ticketNoSeatBookingMap.get(tobeCancelledTicketNo);
         //get booked seats for the show
         if (seatBookingMap == null || seatBookingMap.isEmpty()) {
-            throw new InvalidException(String.format("Show Id %s has no booking", show.getShowId()));
+            throw new InvalidException(String.format("Ticket# %s NOT found", tobeCancelledTicketNo));
         } else {
             //get buyer booking
-            buyerBooking = seatBookingMap.values().parallelStream().filter(b -> b.getBuyer().equals(buyer)).findFirst();
+            buyerBooking = seatBookingMap.values().parallelStream()
+                    .filter(b -> b.getBuyer().equals(buyer) && b.getTicketNo().equals(tobeCancelledTicketNo))
+                    .findFirst();
 
             if (buyerBooking.isEmpty()) {
-                throw new InvalidException(String.format("Invalid booking NOT found user %s for Show Id %s.",
-                        buyer, show.getShowId()));
+                throw new InvalidException(String.format("Invalid booking NOT found for user %s for Ticket# %s.",
+                        buyer, tobeCancelledTicketNo));
             }
 
             //get threshold time
             Optional<LocalDateTime> thresholdTimeOpt = buyerBooking.map(b -> b.getBookingTime()
-                    .plusMinutes(show.getCancellationMinutesAfterBooking())).stream().findFirst();
+                    .plusMinutes(b.getShow().getCancellationMinutesAfterBooking())).stream().findFirst();
             //check cancellation criteria
-
             boolean isCancellable = thresholdTimeOpt.isEmpty() ? false :
                     thresholdTimeOpt.map(t -> LocalDateTime.now().isBefore(t)).orElseGet(() -> false);
             String cancellationTime = thresholdTimeOpt.orElseGet(() -> LocalDateTime.now()).toString();
 
             if (!isCancellable) {
-                throw new InvalidException(String.format("Too late. Cancellation time was %s for Show Id %s booking %s.",
-                        cancellationTime, show.getShowId(), buyerBooking.orElseGet(null)));
+                throw new InvalidException(String.format("Too late. Cancellation time was %s for Ticket# %s booking %s.",
+                        cancellationTime, tobeCancelledTicketNo, buyerBooking.orElseGet(null)));
             } else {
                 //cancel booking
                 buyerBooking.ifPresentOrElse(b -> {
+                    // remove seat booking status
                     b.getReservedSeats().forEach(seatBookingMap::remove);
+                    // remove ticket booking status
+                    ticketNoSeatBookingMap.remove(b.getTicketNo());
                 }, () -> {
                 });
             }

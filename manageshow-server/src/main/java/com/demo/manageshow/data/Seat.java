@@ -56,7 +56,7 @@ public class Seat {
 
     @Override
     public String toString() {
-        return String.format("[ %s ]",seatName);
+        return String.format("%s",seatName);
     }
 
 }
